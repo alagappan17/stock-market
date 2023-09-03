@@ -173,6 +173,48 @@ export class StockMarket {
     }
 
     /**
+     * This function checks if the investor has subscribed to a stock or not
+     * @param investorToCheck Investor
+     * @param tickerSymbol String
+     * @returns Boolean
+     */
+    public checkIfSubscribed = (investorToCheck: Investor, tickerSymbol: string): boolean => {
+        if(!this.checkIfStockExist(tickerSymbol)) {
+            throw new Error('Cannot check subscription for a stock that does not exist!')
+        }
+        let hasSubscribed: boolean = false
+        const stockSubscribers = this.subscribers.get(tickerSymbol)
+        if(stockSubscribers) {
+            stockSubscribers.forEach((investor) => {
+                if(investor.id == investorToCheck.id) {
+                    hasSubscribed = true
+                }
+            })
+        }
+        return hasSubscribed
+    }
+
+    public unsubscribe = (investorToBeUnsubscribed: Investor, tickerSymbol: string) => {
+        if(!this.checkIfStockExist(tickerSymbol)) {
+            throw new Error('Cannot unsubscribe from a stock that does not exist!')
+        }
+        if(!this.checkIfSubscribed(investorToBeUnsubscribed, tickerSymbol)) {
+            throw new Error('Cannot unsubscribe from a stock that you are not subscribed to!')
+        }
+        
+        const subscribers = this.getSubscribers(tickerSymbol)
+
+        const getNewSubscriberList = (investor: Investor) => {
+            return investor.id !== investorToBeUnsubscribed.id
+        }
+
+        if(subscribers) {
+            const newSubscribers = subscribers.filter(getNewSubscriberList)
+            this.subscribers.set(tickerSymbol, newSubscribers)
+        }
+    }
+
+    /**
      * Sends a notification to the subscribers
      */
     public notifySubscribers = (tickerSymbol: string) => {

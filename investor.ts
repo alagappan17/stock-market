@@ -1,4 +1,3 @@
-import { Stock } from "./stock"
 import { v4 as uuidv4 } from 'uuid';
 
 type InvestorType = {
@@ -31,6 +30,7 @@ export class Investor implements InvestorType {
      */
     public updateDetails = (investorNewName: string) => {
         this.name = investorNewName
+        console.log(this.name + ' your details have been updated!')
     }
 
     /**

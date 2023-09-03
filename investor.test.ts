@@ -1,5 +1,4 @@
 import { Investor } from "./investor"
-import { StockMarket } from "./stock-market"
 
 describe("Investor", () => {
     it("Should create a new Investor with name", () => {
@@ -16,7 +15,6 @@ describe("Investor", () => {
     it("Should be able to view details", () => {
         //Given
         const investorName = 'Barney Stinson'
-
         const investor = new Investor(investorName)
 
         //When

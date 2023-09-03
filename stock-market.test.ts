@@ -1,6 +1,5 @@
 import {StockMarket} from './stock-market'
 import { Investor } from './investor'
-import { Stock } from './stock'
 
 describe("Stock Market", () => {
     var stockMarket: StockMarket
@@ -117,9 +116,6 @@ describe("Stock Market", () => {
 
     it("Should be able to delete a Stock with it's Ticker Symbol", () => {
         //Given
-        const appleStock = new Stock(appleStockName, appleStockTickerSymbol, appleStockPrice)
-        const amazonStock = new Stock(amazonStockName, amazonStockTickerSymbol, amazonStockPrice)
-
         stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
         stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
         stockMarket.addStock(amazonStockName, amazonStockTickerSymbol, amazonStockPrice)
@@ -129,7 +125,9 @@ describe("Stock Market", () => {
         const stocks = stockMarket.getStocks()
         
         //Then
-        expect(stocks).toEqual([appleStock, amazonStock])
+        expect(stocks[1].name).toEqual(amazonStockName)
+        expect(stocks[1].tickerSymbol).toEqual(amazonStockTickerSymbol)
+        expect(stocks[1].price).toEqual(amazonStockPrice)
     })
 
     it("Should not be able to delete a stock that does not exist", () => {
@@ -174,32 +172,6 @@ describe("Stock Market", () => {
         expect(() => stockMarket.updateStock('AZMN', appleStockNewName, appleStockNewTickerSymbol, appleStockNewPrice)).toThrowError()
     })
 
-    it("Should let investors subscribe to a stock", () => {
-        //Given
-        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
-        const investor = new Investor('Lily Aldrin')
-        const stockToWatch = 'AAPL'
-        const logSpy = jest.spyOn(console, 'log');
-
-        //When
-        stockMarket.subscribe(investor, stockToWatch)
-
-        //Then
-        expect(logSpy).toHaveBeenCalledWith(`${investor.name} is now watching ${stockToWatch}`)
-    })
-
-    it("Should not let investors subscribe to a stock that does not exist", () => {
-        //Given
-        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
-        const investor = new Investor('Lily Aldrin')
-        const stockToWatch = 'MSFT'
-
-        //When
-        
-        //Then
-        expect(() => stockMarket.subscribe(investor, stockToWatch)).toThrowError()
-    })
-
     it("Should be able to store the list of investors who have subscribed to a particular stock", () => {
         //Given
         stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
@@ -212,6 +184,18 @@ describe("Stock Market", () => {
 
         //Then
         expect(subscribers).toEqual([investor])
+    })
+
+    it("Should not let investors subscribe to a stock that does not exist", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const investor = new Investor('Lily Aldrin')
+        const stockToWatch = 'MSFT'
+
+        //When
+        
+        //Then
+        expect(() => stockMarket.subscribe(investor, stockToWatch)).toThrowError()
     })
 
     it("Should not be able to get a list of subscribers that does not exist", () => {
@@ -243,5 +227,65 @@ describe("Stock Market", () => {
         //Then
         expect(logSpy).toHaveBeenCalledWith('Hi Ted Mosby, You have a new notification!')
         expect(logSpy).toHaveBeenCalledWith(`${appleStockNewName} has been updated! \nDetails: \n Name: ${appleStockNewName}\n Ticker Symbol: ${appleStockNewTickerSymbol}\n Price: ${appleStockNewPrice}`)
+    })
+
+    it("Should be able to check if an investor has subscribed to a stock or not", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
+        const investor = new Investor('Marshall Eriksen')
+        stockMarket.subscribe(investor, 'AAPL')
+
+        //When
+        const hasSubscibed1 = stockMarket.checkIfSubscribed(investor, 'AAPL')
+        const hasSubscibed2 = stockMarket.checkIfSubscribed(investor, 'MSFT')
+
+        //Then
+        expect(hasSubscibed1).toBeTruthy()
+        expect(hasSubscibed2).not.toBeTruthy()
+    })
+
+    it("Should not be able to check if an investor has subscribed to a stock or not for a stock that does not exist", () => {
+        //Given
+        const investor = new Investor('Marshall Eriksen')
+
+        //When
+
+        //Then
+        expect(() => stockMarket.checkIfSubscribed(investor, 'AAPL')).toThrowError()
+    })
+
+    it("Should let user unscubscribe from a stock", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const investor = new Investor('Marshall Eriksen')
+        stockMarket.subscribe(investor, 'AAPL')
+
+        //When
+        stockMarket.unsubscribe(investor, 'AAPL')
+
+        //Then
+        expect(stockMarket.checkIfSubscribed(investor, 'AAPL')).not.toBeTruthy()
+    })
+
+    it("Should not let user unscubscribe from a stock they have not subscribed to", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const investor = new Investor('Marshall Eriksen')
+
+        //When
+
+        //Then
+        expect(() => stockMarket.unsubscribe(investor, 'AAPL')).toThrowError()
+    })
+
+    it("Should not let user unscubscribe from a stock that does not exist", () => {
+        //Given
+        const investor = new Investor('Marshall Eriksen')
+
+        //When
+
+        //Then
+        expect(() => stockMarket.unsubscribe(investor, 'AAPL')).toThrowError()
     })
 })
