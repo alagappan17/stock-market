@@ -53,6 +53,25 @@ export class StockMarket {
     }
 
     /**
+     * Searches a stock with ticker symbol and returns the stock if it exists in the list
+     * @param searchTickerSymbol String
+     * @returns Stock
+     */
+    public fetchStockDetails = (searchTickerSymbol: string): Stock => {
+        if(!this.checkIfStockExist(searchTickerSymbol)) {
+            throw new Error('Cannot get details of stock that does not exist')
+        }
+
+        let stockDetails: Stock = new Stock('','',0)
+        this.stocks.forEach((stock) => {
+            if(stock.tickerSymbol === searchTickerSymbol) {
+                stockDetails = stock
+            }
+        })
+        return stockDetails
+    }
+
+    /**
      * This functions creates a new Stock and pushes it to the Stocks List
      * @param name String
      * @param tickerSymbol String
@@ -68,6 +87,7 @@ export class StockMarket {
         const newStock = new Stock(name, tickerSymbol, price)
 
         this.stocks.push(newStock)
+        console.log(`${newStock.tickerSymbol} has been listed!`)
         return newStock
     }
 
@@ -123,9 +143,8 @@ export class StockMarket {
      */
     public getSubscribers = (tickerSymbol: string): Investor[] | undefined => {
         if(!this.checkIfStockExist(tickerSymbol)) {
-            throw new Error('The Stock you have requested for does not exist')
+            throw new Error('Cannot fetch list of subscribers for a stock that does not exist!')
         }
-
         return this.subscribers.get(tickerSymbol)
     }
 
@@ -135,20 +154,22 @@ export class StockMarket {
      * @param investor Investor
      */
     public subscribe = (investor: Investor, tickerSymbol: string) => {
-        let doesStockExist = this.checkIfStockExist(tickerSymbol)
+        if(!this.checkIfStockExist(tickerSymbol)) {
+            throw new Error('Cannot subscrbe to a stock that does not exist!')
+        }
 
-        if(this.subscribers.get(tickerSymbol) === undefined && doesStockExist){
+        if(this.subscribers.get(tickerSymbol) === undefined){
             this.subscribers.set(tickerSymbol, [])
         }
 
         let stockSubscribers = this.subscribers.get(tickerSymbol)
 
-        if(stockSubscribers && doesStockExist) {
+        if(stockSubscribers) {
             stockSubscribers.push(investor)
             this.subscribers.set(tickerSymbol, stockSubscribers)
         }
 
-        console.log('From Stock Market: ', this.subscribers.get(tickerSymbol))
+        console.log(investor.name + " is now watching " + tickerSymbol)
     }
 
     /**
@@ -156,9 +177,10 @@ export class StockMarket {
      */
     public notifySubscribers = (tickerSymbol: string) => {
         const stockSubscribers = this.subscribers.get(tickerSymbol)
+        const stockDetails = this.fetchStockDetails(tickerSymbol)
         if(stockSubscribers){
             stockSubscribers.forEach((subscriber) => {
-                subscriber.update()
+                subscriber.update(`${stockDetails.name} has been updated! \nDetails: \n Name: ${stockDetails.name}\n Ticker Symbol: ${stockDetails.tickerSymbol}\n Price: ${stockDetails.price}`)
             })
         }
     }

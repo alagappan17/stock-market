@@ -50,9 +50,9 @@ describe("Investor", () => {
         const logSpy = jest.spyOn(console, 'log');
 
         //When
-        investor.update()
+        investor.update('Amazon has been updated')
 
         //Then
-        expect(logSpy).toHaveBeenCalledWith('New stock update!')
+        expect(logSpy).toHaveBeenCalledWith('Hi Barney, You have a new notification!')
     })
 })

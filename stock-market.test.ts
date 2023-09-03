@@ -38,7 +38,20 @@ describe("Stock Market", () => {
         expect(stocks).toEqual([])
     })
 
-    it("Should be able to add stocks to the list", () => {
+    it("Should be able to add a stock to the list", () => {
+        //Given
+        
+        //When
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const stocks = stockMarket.getStocks()
+        
+        //Then
+        expect(stocks[0].name).toEqual(appleStockName)
+        expect(stocks[0].tickerSymbol).toEqual(appleStockTickerSymbol)
+        expect(stocks[0].price).toEqual(appleStockPrice)
+    })
+
+    it("Should be able to add multiple stocks to the list", () => {
         //Given
         
         //When
@@ -53,6 +66,43 @@ describe("Stock Market", () => {
         expect(stocks[1].name).toEqual(microsoftStockName)
         expect(stocks[1].tickerSymbol).toEqual(microsoftStockTickerSymbol)
         expect(stocks[1].price).toEqual(microsoftStockPrice)
+    })
+
+    it("Should be able to check if a stock exists in the list or not", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
+
+        //When
+        const doesStockExist1 = stockMarket.checkIfStockExist('AAPL')
+        const doesStockExist2 = stockMarket.checkIfStockExist('AMZN')
+
+        //Then
+        expect(doesStockExist1).toBeTruthy()
+        expect(doesStockExist2).not.toBeTruthy
+    })
+
+    it("Should be able to fetch details of a stock", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+
+        //When
+        const stockDetails = stockMarket.fetchStockDetails('AAPL')
+
+        //Then
+        expect(stockDetails.name).toEqual(appleStockName)
+        expect(stockDetails.tickerSymbol).toEqual(appleStockTickerSymbol)
+        expect(stockDetails.price).toEqual(appleStockPrice)
+    })
+
+    it("Should not be able to fetch details of a stock that does not exist", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+
+        //When
+
+        //Then
+        expect(() => stockMarket.fetchStockDetails('AMZN')).toThrowError()
     })
 
     it("Should not be able to add multiple stocks with the same ticker symbol", () => {
@@ -124,7 +174,33 @@ describe("Stock Market", () => {
         expect(() => stockMarket.updateStock('AZMN', appleStockNewName, appleStockNewTickerSymbol, appleStockNewPrice)).toThrowError()
     })
 
-    it("Should be able to store all the investors who have subscribed", () => {
+    it("Should let investors subscribe to a stock", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const investor = new Investor('Lily Aldrin')
+        const stockToWatch = 'AAPL'
+        const logSpy = jest.spyOn(console, 'log');
+
+        //When
+        stockMarket.subscribe(investor, stockToWatch)
+
+        //Then
+        expect(logSpy).toHaveBeenCalledWith(`${investor.name} is now watching ${stockToWatch}`)
+    })
+
+    it("Should not let investors subscribe to a stock that does not exist", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        const investor = new Investor('Lily Aldrin')
+        const stockToWatch = 'MSFT'
+
+        //When
+        
+        //Then
+        expect(() => stockMarket.subscribe(investor, stockToWatch)).toThrowError()
+    })
+
+    it("Should be able to store the list of investors who have subscribed to a particular stock", () => {
         //Given
         stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
         stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
@@ -133,30 +209,39 @@ describe("Stock Market", () => {
         const investor = new Investor('Ted Mosby')
         stockMarket.subscribe(investor, 'AAPL')
         const subscribers = stockMarket.getSubscribers('AAPL')
-        console.log('From Test: ', [investor])
 
         //Then
         expect(subscribers).toEqual([investor])
     })
 
-    // it("Should send back a notification when stocks are updated", () => {
-    //     //Given
-    //     stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
-    //     stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
+    it("Should not be able to get a list of subscribers that does not exist", () => {
+        //Given
 
-    //     const investor = new Investor('Ted Mosby')
-    //     stockMarket.subscribe(investor)
+        //When
 
-    //     const appleStockNewName = 'Apple Inc.'
-    //     const appleStockNewTickerSymbol = 'APPL'
-    //     const appleStockNewPrice = 200
+        //Then
+        expect(() => stockMarket.getSubscribers('MSFT')).toThrowError()
+    })
 
-    //     const logSpy = jest.spyOn(console, 'log');
+    it("Should be able to send updates to the subscribed investors when the Stock is updated", () => {
+        //Given
+        stockMarket.addStock(appleStockName, appleStockTickerSymbol, appleStockPrice)
+        stockMarket.addStock(microsoftStockName, microsoftStockTickerSymbol, microsoftStockPrice)
 
-    //     //When
-    //     stockMarket.updateStock('AAPL', appleStockNewName, appleStockNewTickerSymbol, appleStockNewPrice)
+        const investor = new Investor('Ted Mosby')
+        stockMarket.subscribe(investor, 'AAPL')
 
-    //     //Then
-    //     expect(logSpy).toHaveBeenCalledWith('New stock update!')
-    // })
+        const appleStockNewName = 'Apple Inc.'
+        const appleStockNewTickerSymbol = 'APPL'
+        const appleStockNewPrice = 200
+
+        const logSpy = jest.spyOn(console, 'log');
+
+        //When
+        stockMarket.updateStock('AAPL', appleStockNewName, appleStockNewTickerSymbol, appleStockNewPrice)
+
+        //Then
+        expect(logSpy).toHaveBeenCalledWith('Hi Ted Mosby, You have a new notification!')
+        expect(logSpy).toHaveBeenCalledWith(`${appleStockNewName} has been updated! \nDetails: \n Name: ${appleStockNewName}\n Ticker Symbol: ${appleStockNewTickerSymbol}\n Price: ${appleStockNewPrice}`)
+    })
 })

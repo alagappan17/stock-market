@@ -2,13 +2,12 @@ import { Stock } from "./stock"
 import { v4 as uuidv4 } from 'uuid';
 
 type InvestorType = {
-    update(): void
+    update(message: string): void
 }
 
 export class Investor implements InvestorType {
     public id: string
     public name: string
-    public watchlist: Stock[] = []
 
     constructor(name: string) {
         this.name = name
@@ -37,7 +36,8 @@ export class Investor implements InvestorType {
     /**
      * This function prints notifications when a stock is updated
      */
-    public update = () => {
-        console.log('New stock update!')
+    public update = (message: string) => {
+        console.log(`Hi ${this.name}, You have a new notification!`)
+        console.log(message)
     }
 }
