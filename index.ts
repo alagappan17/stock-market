@@ -53,3 +53,7 @@ stockMarket.updateStock('AAPL', 'Apple Inc.', 'APPL', 200)
 stockMarket.updateStock('AMZN', 'Amazon Inc.', 'AMZN', 200)
 stockMarket.updateStock('MSFT', 'Microsoft Inc.', 'MSFT', 100)
 console.log('\n')
+
+console.log('*** Invetors unsubscribing from stocks: ***')
+stockMarket.unsubscribe(investor1, 'MSFT')
+console.log('\n')

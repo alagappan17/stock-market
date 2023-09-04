@@ -145,6 +145,11 @@ export class StockMarket {
         if(!this.checkIfStockExist(tickerSymbol)) {
             throw new Error('Cannot fetch list of subscribers for a stock that does not exist!')
         }
+
+        if(this.subscribers.get(tickerSymbol) === undefined) {
+            return []
+        }
+
         return this.subscribers.get(tickerSymbol)
     }
 
@@ -155,7 +160,7 @@ export class StockMarket {
      */
     public subscribe = (investor: Investor, tickerSymbol: string) => {
         if(!this.checkIfStockExist(tickerSymbol)) {
-            throw new Error('Cannot subscrbe to a stock that does not exist!')
+            throw new Error('Cannot subscribe to a stock that does not exist!')
         }
 
         if(this.subscribers.get(tickerSymbol) === undefined){
@@ -212,6 +217,8 @@ export class StockMarket {
             const newSubscribers = subscribers.filter(getNewSubscriberList)
             this.subscribers.set(tickerSymbol, newSubscribers)
         }
+
+        console.log(investorToBeUnsubscribed.name + " has stopped watching " + tickerSymbol)
     }
 
     /**

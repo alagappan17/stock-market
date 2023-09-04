@@ -78,7 +78,7 @@ describe("Stock Market", () => {
 
         //Then
         expect(doesStockExist1).toBeTruthy()
-        expect(doesStockExist2).not.toBeTruthy
+        expect(doesStockExist2).not.toBeTruthy()
     })
 
     it("Should be able to fetch details of a stock", () => {
@@ -205,6 +205,17 @@ describe("Stock Market", () => {
 
         //Then
         expect(() => stockMarket.getSubscribers('MSFT')).toThrowError()
+    })
+
+    it("Should get an empty list when there are no subscribers for a particular stock", () => {
+        //Given
+        stockMarket.addStock(amazonStockName, amazonStockTickerSymbol, amazonStockPrice)
+
+        //When
+        const subscribers = stockMarket.getSubscribers('AMZN')
+
+        //Then
+        expect(subscribers).toEqual([])
     })
 
     it("Should be able to send updates to the subscribed investors when the Stock is updated", () => {
